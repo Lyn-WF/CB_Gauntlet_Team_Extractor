@@ -22,8 +22,8 @@ class Reader
 	end
 	
 	def scan_keywords_from_file()
-		keyword_regex = /\[ext_resource path="res:\/\/([a-zA-Z_]+[\/\."])+ type="[a-zA-Z]+" id=[0-9]+\]/
-		name_regex = /\/[a-zA-Z\_]+\./
+		keyword_regex = /\[ext_resource path="res:\/\/([a-zA-Z0-9_]+[\/\."])+ type="[a-zA-Z]+" id=[0-9]+\]/
+		name_regex = /\/[a-zA-Z0-9\_]+\./
 		id_regex = /id=[0-9]+/
 		
 		@raw.each_line do |line|
@@ -31,6 +31,7 @@ class Reader
 				id = Integer(id_regex.match(line)[0][3..-1]) # "id=12" -> 12
 				name = name_regex.match(line)[0][1..-2]      # "/smack." -> smack
 				@keywords[id] = name
+				#puts("#{id}: #{@keywords[id]}")
 			end
 		end
 	end
