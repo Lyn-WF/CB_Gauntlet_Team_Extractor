@@ -28,7 +28,7 @@ class Tape
 			puts(" -#{sticker}")
 		end
 		if @difficulty != "any"
-			puts("#{@difficulty[0]} difficulty #{@difficulty[1]}")
+			puts("#{@difficulty}")
 		end
 	end
 end

@@ -37,6 +37,7 @@ class Reader
 	
 	def scan_character_name_from_file(initial_char)
 		name_regex = /character_name = "[a-zA-Z_]+"/
+		subname_short_regex = /[a-zA-Z_]+_NAME_SHORT/
 		subname_regex = /[a-zA-Z_]+_NAME/
 		character_backup_regex = /node name="GauntletCharacterConfig2" type="Node"/
 		
@@ -47,8 +48,10 @@ class Reader
 			if active
 				if name_regex.match?(line)
 					name = name_regex.match(line)[0][18..-2] # "character_name = "FRANKIE_NAME" -> FRANKIE_NAME
-					if subname_regex.match?(name) #_NAME match and removal is optional, I think some edge cases don't use it
-						name = name[0..-7] # FRANKIE_NAME -> FRANKIE
+					if subname_short_regex.match?(name)
+						name = name[0..-12] # IANTHE_NAME_SHORT -> IANTHE
+					elsif subname_regex.match?(name)
+						name = name[0..-6] # FRANKIE_NAME -> FRANKIE
 					end
 					return name
 				end
@@ -59,7 +62,7 @@ class Reader
 				active = true;
 			end
 		end
-		return "Name Unknown";
+		return "character_name missing (Probably an Archangel or Static Encounter)";
 	end
 	
 	def scan_tapes_from_file(initial_char)
@@ -67,7 +70,7 @@ class Reader
 		bootleg_regex = /type_override = \[ ExtResource\( [0-9]+ \) \]/
 		moves_regex = /moves_override = \[ (ExtResource\( [0-9]+ \),? )+\]/
 		resource_regex = /ExtResource\( [0-9]+ \)/ # used to pull an array of stickers from a character, but in theory matches any resource
-		difficulty_regex = /(require)|(deny)_gauntlet_difficulty = [0-9]+/
+		difficulty_regex = /((require)|(deny))_gauntlet_difficulty = [0-9]+/
 		character_backup_regex = /node name="GauntletCharacterConfig2" type="Node"/
 		
 		active = initial_char
@@ -94,7 +97,7 @@ class Reader
 						current_tape.add_sticker(sticker)
 					end
 				elsif difficulty_regex.match?(line)
-					current_tape.add_difficulty( [ difficulty_regex.match(line)[0], line[-2..-1] ])
+					current_tape.add_difficulty( difficulty_regex.match(line)[0])
 				elsif character_backup_regex.match?(line)
 					break
 				end
